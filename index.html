@@ -49,7 +49,67 @@
             line-height: 1.6;
             opacity: 0.9;
         }
-        
+
+        /* 未来留言区 */
+        .future-letter {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+        .future-letter h3 {
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        .letter-input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1rem;
+            margin: 10px 0;
+        }
+        .letter-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .letter-display {
+            margin-top: 15px;
+            font-style: italic;
+            min-height: 24px;
+        }
+        .btn {
+            background: linear-gradient(90deg, #ff7e5f, #feb47b);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        /* 每日一问 */
+        .daily-question {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+        .daily-question h3 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        .question-text {
+            font-size: 1.1rem;
+            margin: 10px 0;
+            min-height: 28px;
+        }
+
         .countdown {
             display: flex;
             justify-content: center;
@@ -128,35 +188,17 @@
             font-weight: 700;
         }
         
-        .firework {
-            position: absolute;
-            pointer-events: none;
-            z-index: 5;
-        }
-        
-        .particle {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            pointer-events: none;
-            box-shadow: 0 0 6px currentColor;
-        }
-        
         @media (max-width: 768px) {
             h1 {
                 font-size: 2.2rem;
             }
-            
             .time-unit {
                 min-width: 100px;
                 padding: 15px;
             }
-            
             .time-value {
                 font-size: 2.8rem;
             }
-            
             .container {
                 padding: 25px;
             }
@@ -166,22 +208,21 @@
             h1 {
                 font-size: 1.8rem;
             }
-            
             .time-unit {
                 min-width: 70px;
                 padding: 10px;
             }
-            
             .time-value {
                 font-size: 2rem;
             }
-            
             .time-label {
                 font-size: 0.9rem;
             }
-            
             .description {
                 font-size: 1rem;
+            }
+            .future-letter, .daily-question {
+                padding: 15px;
             }
         }
     </style>
@@ -194,23 +235,36 @@
             从 <span class="highlight">2025年8月1日 00:00 UTC</span> 开始，我们正在倒计时前往<span class="highlight">1万天后</span>的未来世界。
             每一天都是迈向未来的脚步，每一秒都充满无限可能。
         </p>
+
+        <!-- 写给未来的你 -->
+        <div class="future-letter">
+            <h3>✨ 写给2053年的你</h3>
+            <textarea id="letter-input" class="letter-input" rows="3" placeholder="写下你想对1万天后的自己说的话..."></textarea>
+            <br>
+            <button class="btn" onclick="saveLetter()">保存留言</button>
+            <div id="letter-display" class="letter-display"></div>
+        </div>
+
+        <!-- 每日一问 -->
+        <div class="daily-question">
+            <h3>🤔 今日思考</h3>
+            <div id="question-text" class="question-text">加载中...</div>
+            <button class="btn" onclick="showNewQuestion()">换一个问题</button>
+        </div>
         
         <div class="countdown">
             <div class="time-unit">
                 <div class="time-value" id="days">0</div>
                 <div class="time-label">天</div>
             </div>
-            
             <div class="time-unit">
                 <div class="time-value" id="hours">0</div>
                 <div class="time-label">时</div>
             </div>
-            
             <div class="time-unit">
                 <div class="time-value" id="minutes">0</div>
                 <div class="time-label">分</div>
             </div>
-            
             <div class="time-unit">
                 <div class="time-value" id="seconds">0</div>
                 <div class="time-label">秒</div>
@@ -233,25 +287,56 @@
     </div>
 
     <script>
+        // 趣味问题库
+        const questions = [
+            "1万天后，你会在哪里？",
+            "如果能给未来的自己带一件东西，你会选什么？",
+            "你希望2053年的世界是什么样子？",
+            "现在的你，最想感谢谁？",
+            "如果时间是一条河，你希望它流向何方？",
+            "1万天后，你希望自己学会了什么新技能？",
+            "你相信未来的自己会为今天的选择骄傲吗？"
+        ];
+
+        function showNewQuestion() {
+            const randomQ = questions[Math.floor(Math.random() * questions.length)];
+            document.getElementById('question-text').textContent = randomQ;
+        }
+
+        function saveLetter() {
+            const input = document.getElementById('letter-input');
+            const text = input.value.trim();
+            if (text) {
+                localStorage.setItem('futureLetter', text);
+                displayLetter();
+                input.value = '';
+                alert('留言已保存！✨');
+            }
+        }
+
+        function displayLetter() {
+            const saved = localStorage.getItem('futureLetter');
+            const display = document.getElementById('letter-display');
+            if (saved) {
+                display.textContent = `"${saved}"`;
+            } else {
+                display.textContent = "还没有留言哦，快写下给未来的寄语吧！";
+            }
+        }
+
+        // 倒计时逻辑
         document.addEventListener('DOMContentLoaded', function() {
-            // 设置起始时间和目标时间（UTC）
-            const startDate = new Date(Date.UTC(2025, 7, 1, 0, 0, 0, 0)); // 2025年8月1日 00:00 UTC
+            const startDate = new Date(Date.UTC(2025, 7, 1, 0, 0, 0, 0));
             const totalDays = 10000;
             const endDate = new Date(startDate);
             endDate.setUTCDate(startDate.getUTCDate() + totalDays);
-            
-            // 显示结束日期
             document.getElementById('end-date').textContent = endDate.toISOString().split('T')[0];
-            
-            // 更新倒计时函数
+
             function updateCountdown() {
                 const now = new Date();
                 const nowUTC = new Date(now.getTime() + (now.getTimezoneOffset() * 60000));
-                
-                // 计算时间差（秒）
                 let diff = Math.floor((endDate - nowUTC) / 1000);
                 
-                // 如果已经到达或超过目标日期
                 if (diff <= 0) {
                     document.getElementById('days').textContent = '0';
                     document.getElementById('hours').textContent = '0';
@@ -261,98 +346,31 @@
                     return;
                 }
                 
-                // 计算天、时、分、秒
                 const days = Math.floor(diff / (24 * 60 * 60));
                 diff -= days * 24 * 60 * 60;
-                
                 const hours = Math.floor(diff / (60 * 60));
                 diff -= hours * 60 * 60;
-                
                 const minutes = Math.floor(diff / 60);
-                diff -= minutes * 60;
-                
                 const seconds = diff;
                 
-                // 更新显示
                 document.getElementById('days').textContent = days;
                 document.getElementById('hours').textContent = hours;
                 document.getElementById('minutes').textContent = minutes;
                 document.getElementById('seconds').textContent = seconds;
                 
-                // 更新进度条
                 const totalSeconds = totalDays * 24 * 60 * 60;
-                const elapsedSeconds = totalSeconds - diff - days * 24 * 60 * 60;
-                const progress = ((days * 24 * 60 * 60 + elapsedSeconds) / totalSeconds) * 100;
+                const elapsedSeconds = totalSeconds - (days * 24 * 60 * 60 + diff);
+                const progress = (elapsedSeconds / totalSeconds) * 100;
                 document.getElementById('progress-bar').style.width = progress + '%';
             }
-            
-            // 初始化并开始倒计时
+
             updateCountdown();
             setInterval(updateCountdown, 1000);
+
+            // 初始化互动内容
+            showNewQuestion();
+            displayLetter();
         });
-
-        // 礼花效果
-        document.addEventListener('click', function(e) {
-            createFirework(e.clientX, e.clientY);
-        });
-
-        function createFirework(x, y) {
-            const firework = document.createElement('div');
-            firework.className = 'firework';
-            firework.style.left = x + 'px';
-            firework.style.top = y + 'px';
-            document.body.appendChild(firework);
-
-            const particleCount = 30 + Math.floor(Math.random() * 20); // 减少数量，增大尺寸
-            const colors = ['#ff0000', '#ffff00', '#00ff00', '#00ffff', '#ff00ff', '#ffffff', '#ff8800', '#0088ff'];
-            
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                const size = 8 + Math.random() * 12; // 更大的尺寸：8-20px
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                
-                const angle = Math.random() * Math.PI * 2;
-                const speed = 3 + Math.random() * 7; // 增加速度
-                const vx = Math.cos(angle) * speed;
-                const vy = Math.sin(angle) * speed;
-                const gravity = 0.08; // 增加重力效果
-                const friction = 0.98;
-                
-                let posX = 0;
-                let posY = 0;
-                let currentVY = vy;
-                
-                firework.appendChild(particle);
-                
-                // 动画函数
-                function animate() {
-                    posX += vx;
-                    posY += currentVY;
-                    currentVY += gravity;
-                    currentVY *= friction;
-                    
-                    particle.style.transform = `translate(${posX}px, ${posY}px)`;
-                    particle.style.opacity = Math.max(0, 1 - (Date.now() - startTime) / 1500); // 延长显示时间
-                    
-                    if (particle.style.opacity > 0.1) {
-                        requestAnimationFrame(animate);
-                    } else {
-                        particle.remove();
-                        if (firework.children.length === 0) {
-                            firework.remove();
-                        }
-                    }
-                }
-                
-                const startTime = Date.now();
-                setTimeout(() => {
-                    requestAnimationFrame(animate);
-                }, Math.random() * 50);
-            }
-        }
     </script>
 </body>
 </html>
