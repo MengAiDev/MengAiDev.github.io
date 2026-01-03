@@ -50,7 +50,6 @@
             opacity: 0.9;
         }
 
-        /* 未来留言区 */
         .future-letter {
             background: rgba(255, 255, 255, 0.1);
             padding: 20px;
@@ -93,7 +92,6 @@
             opacity: 0.9;
         }
 
-        /* 每日一问 */
         .daily-question {
             background: rgba(255, 255, 255, 0.1);
             padding: 20px;
@@ -236,7 +234,6 @@
             每一天都是迈向未来的脚步，每一秒都充满无限可能。
         </p>
 
-        <!-- 写给未来的你 -->
         <div class="future-letter">
             <h3>✨ 写给2053年的你</h3>
             <textarea id="letter-input" class="letter-input" rows="3" placeholder="写下你想对1万天后的自己说的话..."></textarea>
@@ -245,7 +242,6 @@
             <div id="letter-display" class="letter-display"></div>
         </div>
 
-        <!-- 每日一问 -->
         <div class="daily-question">
             <h3>🤔 今日思考</h3>
             <div id="question-text" class="question-text">加载中...</div>
@@ -324,20 +320,25 @@
             }
         }
 
-        // 倒计时逻辑
+        // 倒计时主逻辑
         document.addEventListener('DOMContentLoaded', function() {
+            // 起始时间：2025年8月1日 00:00 UTC
             const startDate = new Date(Date.UTC(2025, 7, 1, 0, 0, 0, 0));
             const totalDays = 10000;
             const endDate = new Date(startDate);
-            endDate.setUTCDate(startDate.getUTCDate() + totalDays);
+            endDate.setDate(startDate.getUTCDate() + totalDays);
+            
+            // 显示目标日期（本地格式 YYYY-MM-DD）
             document.getElementById('end-date').textContent = endDate.toISOString().split('T')[0];
 
             function updateCountdown() {
                 const now = new Date();
-                const nowUTC = new Date(now.getTime() + (now.getTimezoneOffset() * 60000));
-                let diff = Math.floor((endDate - nowUTC) / 1000);
-                
-                if (diff <= 0) {
+                // 转为 UTC 时间进行比较（避免时区干扰）
+                const nowUTC = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+                const totalDiffMs = endDate - nowUTC;
+
+                if (totalDiffMs <= 0) {
+                    // 已到达目标
                     document.getElementById('days').textContent = '0';
                     document.getElementById('hours').textContent = '0';
                     document.getElementById('minutes').textContent = '0';
@@ -345,25 +346,30 @@
                     document.getElementById('progress-bar').style.width = '100%';
                     return;
                 }
-                
-                const days = Math.floor(diff / (24 * 60 * 60));
-                diff -= days * 24 * 60 * 60;
-                const hours = Math.floor(diff / (60 * 60));
-                diff -= hours * 60 * 60;
-                const minutes = Math.floor(diff / 60);
-                const seconds = diff;
-                
+
+                // 转换为总秒数（向下取整）
+                const totalSec = Math.floor(totalDiffMs / 1000);
+
+                // 分解时间单位（使用取模确保范围正确）
+                const days = Math.floor(totalSec / 86400);
+                const hours = Math.floor((totalSec % 86400) / 3600);
+                const minutes = Math.floor((totalSec % 3600) / 60);
+                const seconds = totalSec % 60; // ✅ 保证 0~59
+
+                // 更新显示
                 document.getElementById('days').textContent = days;
                 document.getElementById('hours').textContent = hours;
                 document.getElementById('minutes').textContent = minutes;
                 document.getElementById('seconds').textContent = seconds;
-                
-                const totalSeconds = totalDays * 24 * 60 * 60;
-                const elapsedSeconds = totalSeconds - (days * 24 * 60 * 60 + diff);
+
+                // 更新进度条
+                const totalSeconds = totalDays * 86400; // 10000天的总秒数
+                const elapsedSeconds = totalSeconds - totalSec;
                 const progress = (elapsedSeconds / totalSeconds) * 100;
                 document.getElementById('progress-bar').style.width = progress + '%';
             }
 
+            // 初始化并启动倒计时
             updateCountdown();
             setInterval(updateCountdown, 1000);
 
